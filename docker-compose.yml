@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  py:
+    build: ./tracker_api
+    command: gunicorn wsgi:application --chdir=/tracker/src -b=0.0.0.0:8000 -w=4 -t=10
+    container: "Tracker-Backend"
+    environment:
+      TRACKER_ENV: ${TRACKER_ENV:-development}
+    extra_hosts:
+      - "host.docker.internal.host-gateway"
+    image: tracker:api
+    ports:
+      - "8000:8000"
+    restart: always
+    volumes:
+     - ./tracker_api:/tracker
+
+  webui:
+    build: ./tracker_webui
+    command: bash -c "npm ci --location=project && npm run build && npm start"
+    container_name: "Tracker-Frontend"
+    environment:
+      NODE_ENV: ${NODE_ENV:-local}
+    image: tracker: webui
+    ports:
+      - "3000:3000"
+    restart: always
+    volumes:
+      - ./tracker_webui:/tracker
+    depends_on:
+      - api
+
+  nginx:
+    image: nginx:latest
+    contaner_name: "Tracker-Nginx"
+    ports:
+      - "80:80"
+    volumes:
+     - ./nginx:/etc/nginx/conf.d
+     - ./tracker_webui/.nuxt:/.nuxt
+    depends_on:
+      - webui
