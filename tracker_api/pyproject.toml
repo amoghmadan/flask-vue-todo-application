@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "tracker-api"
+version = "0.1.0"
+description = "TODO Application API"
+authors = ["Amogh Madan <amoghmadaan@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "tracker_api"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+flask = "^2.2.3"
+sqlalchemy = "^2.0.7"
+marshmallow = "^3.19.0"
+flask-sqlalchemy = "^3.0.3"
+flask-marshmallow = "^0.14.0"
+marshmallow-sqlalchemy = "^0.29.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
