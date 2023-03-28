@@ -1,14 +1,14 @@
 version: "3"
 
 services:
-  py:
+  api:
     build: ./tracker_api
     command: gunicorn wsgi:application --chdir=/tracker/src -b=0.0.0.0:8000 -w=4 -t=10
-    container: "Tracker-Backend"
+    container_name: "Tracker-Backend"
     environment:
       TRACKER_ENV: ${TRACKER_ENV:-development}
     extra_hosts:
-      - "host.docker.internal.host-gateway"
+      - "host.docker.internal:host-gateway"
     image: tracker:api
     ports:
       - "8000:8000"
@@ -18,11 +18,11 @@ services:
 
   webui:
     build: ./tracker_webui
-    command: bash -c "npm ci --location=project && npm run build && npm start"
+    command: bash -c "npm i --location=project && npm run build && npm start"
     container_name: "Tracker-Frontend"
     environment:
       NODE_ENV: ${NODE_ENV:-local}
-    image: tracker: webui
+    image: tracker:webui
     ports:
       - "3000:3000"
     restart: always
@@ -33,7 +33,7 @@ services:
 
   nginx:
     image: nginx:latest
-    contaner_name: "Tracker-Nginx"
+    container_name: "Tracker-Nginx"
     ports:
       - "80:80"
     volumes:
