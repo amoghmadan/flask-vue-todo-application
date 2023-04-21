@@ -18,13 +18,13 @@ services:
 
   webui:
     build: ./tracker_webui
-    command: bash -c "npm i --location=project && npm run build && npm start"
+    command: bash -c "npm run build && http-server dist"
     container_name: "Tracker-Frontend"
     environment:
       NODE_ENV: ${NODE_ENV:-local}
     image: tracker:webui
     ports:
-      - "3000:3000"
+      - "3000:8080"
     restart: always
     volumes:
       - ./tracker_webui:/tracker
@@ -38,6 +38,5 @@ services:
       - "80:80"
     volumes:
      - ./nginx:/etc/nginx/conf.d
-     - ./tracker_webui/.nuxt:/.nuxt
     depends_on:
       - webui
