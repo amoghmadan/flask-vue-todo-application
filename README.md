@@ -2,7 +2,7 @@
 TODO Application
 
 ## How to start the application?
-- Run this command to start the Flask, Nuxt and Nginx Servers
+- Run this command to start the Flask, Vue and Nginx Servers
   ```bash
   docker-compose up -d
   ```
