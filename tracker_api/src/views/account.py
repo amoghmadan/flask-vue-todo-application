@@ -34,7 +34,7 @@ class LoginView(views.MethodView):
             token = self.model(user_id=user.id)
             db.session.add(token)
             user.last_login = datetime.now()
-        db.session.commit()
+            db.session.commit()
         return jsonify(schema.dump({"token": token.key})), HTTPStatus.CREATED
 
 

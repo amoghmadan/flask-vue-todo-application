@@ -21,7 +21,7 @@ class TokenAuthentication:
                 assert keyword.title() == self.keyword, "Invalid keyword."
                 token = Token.query.filter_by(key=token).first()
                 assert token is not None, "Invalid token."
-                current_user = User.query.filter_by(id=token.user_id).first()
+                current_user = self.model.query.filter_by(id=token.user_id).first()
                 assert current_user is not None, "Invalid token."
                 setattr(request, "user", current_user)
             except (AssertionError, AttributeError, ValueError):
@@ -32,4 +32,5 @@ class TokenAuthentication:
                     )
                 )
             return get_response(*args, **kwargs)
+
         return authenticate

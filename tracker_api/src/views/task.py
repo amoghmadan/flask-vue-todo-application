@@ -19,7 +19,9 @@ class ItemListView(views.MethodView):
     def get(self, *args, **kwargs):
         schema = self.schema_class(many=True)
         filter_kwargs = {"user_id": request.user.id}
-        objects = self.model.query.filter_by(**filter_kwargs).order_by(self.model.created.desc())
+        objects = self.model.query.filter_by(**filter_kwargs).order_by(
+            self.model.created.desc()
+        )
         return jsonify(schema.dump(objects)), HTTPStatus.OK
 
     def post(self, *args, **kwargs):
@@ -39,30 +41,30 @@ class ItemDetailView(views.MethodView):
 
     decorators = [TokenAuthentication()]
     lookup_field = "id"
-    lookup_urk_kwarg = None
+    lookup_url_kwarg = None
     model = Item
     schema_class = ItemSchema
 
     def get(self, *args, **kwargs):
         schema = self.schema_class()
-        lookup_url_kwarg = self.lookup_urk_kwarg or self.lookup_field
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {
             "user_id": request.user.id,
             self.lookup_field: kwargs[lookup_url_kwarg],
         }
-        obj = Item.query.filter_by(**filter_kwargs).first()
+        obj = self.model.query.filter_by(**filter_kwargs).first()
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def put(self, *args, **kwargs):
         schema = self.schema_class()
-        lookup_url_kwarg = self.lookup_urk_kwarg or self.lookup_field
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {
             "user_id": request.user.id,
             self.lookup_field: kwargs[lookup_url_kwarg],
         }
-        obj = Item.query.filter_by(**filter_kwargs).first()
+        obj = self.model.query.filter_by(**filter_kwargs).first()
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
         try:
@@ -74,12 +76,12 @@ class ItemDetailView(views.MethodView):
 
     def patch(self, *args, **kwargs):
         schema = self.schema_class()
-        lookup_url_kwarg = self.lookup_urk_kwarg or self.lookup_field
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {
             "user_id": request.user.id,
             self.lookup_field: kwargs[lookup_url_kwarg],
         }
-        obj = Item.query.filter_by(**filter_kwargs).first()
+        obj = self.model.query.filter_by(**filter_kwargs).first()
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
         try:
@@ -90,12 +92,12 @@ class ItemDetailView(views.MethodView):
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def delete(self, *args, **kwargs):
-        lookup_url_kwarg = self.lookup_urk_kwarg or self.lookup_field
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {
             "user_id": request.user.id,
             self.lookup_field: kwargs[lookup_url_kwarg],
         }
-        obj = Item.query.filter_by(**filter_kwargs).first()
+        obj = self.model.query.filter_by(**filter_kwargs).first()
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
         self.model.query.filter_by(**filter_kwargs).delete()
