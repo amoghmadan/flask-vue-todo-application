@@ -39,21 +39,25 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="justify-center mt-4 flex">
-    <input
-      type="text"
-      id="text"
-      placeholder="Text"
-      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-      v-model="text"
-    />
-    <button
-      type="button"
-      class="middle none center rounded-lg bg-blue-500 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/40 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-      @click="createTaskItem"
-    >
-      Add
-    </button>
+  <div className="justify-center mt-4 flex">
+    <form onSubmit={onSubmit}>
+      <div className="flex items-center py-2">
+        <input
+          type="text"
+          id="text"
+          placeholder="Text"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          v-model="text"
+        />
+        <button
+          type="button"
+          class="middle none center rounded-lg bg-blue-500 py-3 px-6 font-sans text-xs font-bold uppercase text-white shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/40 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+          @click="createTaskItem"
+        >
+          Add
+        </button>
+      </div>
+    </form>
   </div>
 </template>
 
