@@ -45,28 +45,27 @@ class ItemDetailView(views.MethodView):
     model = Item
     schema_class = ItemSchema
 
-    def get(self, *args, **kwargs):
-        schema = self.schema_class()
+    def get_object(self, *args, **kwargs):
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {
             "user_id": request.user.id,
             self.lookup_field: kwargs[lookup_url_kwarg],
         }
         obj = self.model.query.filter_by(**filter_kwargs).first()
+        return obj
+
+    def get(self, *args, **kwargs):
+        obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
+        schema = self.schema_class()
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def put(self, *args, **kwargs):
-        schema = self.schema_class()
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-        filter_kwargs = {
-            "user_id": request.user.id,
-            self.lookup_field: kwargs[lookup_url_kwarg],
-        }
-        obj = self.model.query.filter_by(**filter_kwargs).first()
+        obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
+        schema = self.schema_class()
         try:
             schema.load(request.json, instance=obj, partial=False)
             db.session.commit()
@@ -75,15 +74,10 @@ class ItemDetailView(views.MethodView):
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def patch(self, *args, **kwargs):
-        schema = self.schema_class()
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-        filter_kwargs = {
-            "user_id": request.user.id,
-            self.lookup_field: kwargs[lookup_url_kwarg],
-        }
-        obj = self.model.query.filter_by(**filter_kwargs).first()
+        obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
+        schema = self.schema_class()
         try:
             schema.load(request.json, instance=obj, partial=True)
             db.session.commit()
@@ -92,12 +86,7 @@ class ItemDetailView(views.MethodView):
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def delete(self, *args, **kwargs):
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-        filter_kwargs = {
-            "user_id": request.user.id,
-            self.lookup_field: kwargs[lookup_url_kwarg],
-        }
-        obj = self.model.query.filter_by(**filter_kwargs).first()
+        obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
         self.model.query.filter_by(**filter_kwargs).delete()
