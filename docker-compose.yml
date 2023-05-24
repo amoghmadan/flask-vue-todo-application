@@ -14,8 +14,8 @@ services:
       - "8000:8000"
     restart: always
     volumes:
-     - ./tracker_api:/tracker
-     - api-packages:/tracker/node_modules
+      - ./tracker_api:/tracker
+      - /tracker/node_modules
 
   webui:
     build: ./tracker_webui
@@ -25,11 +25,11 @@ services:
       NODE_ENV: ${NODE_ENV:-local}
     image: tracker:webui
     ports:
-      - "3000:8080"
+      - "3000:3000"
     restart: always
     volumes:
       - ./tracker_webui:/tracker
-      - webui-packages:/tracker/node_modules
+      - /tracker/node_modules
     depends_on:
       - api
 
@@ -40,13 +40,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-     - ./nginx:/etc/nginx/conf.d
-     - ./certs:/etc/ssl/certs
+      - ./nginx:/etc/nginx/conf.d
+      - ./certs:/etc/ssl/certs
     depends_on:
       - webui
-
-volumes:
-  api-packages:
-    name: api-packages
-  webui-packages:
-    name: webui-packages
