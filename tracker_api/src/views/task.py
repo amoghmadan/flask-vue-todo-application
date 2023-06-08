@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from flask import jsonify, request, views
+from flask import Response, jsonify, request, views
 from marshmallow.exceptions import ValidationError
 
 from models import Item
@@ -89,6 +89,6 @@ class ItemDetailView(views.MethodView):
         obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
-        self.model.query.filter_by(**filter_kwargs).delete()
+        db.session.delete(obj)
         db.session.commit()
-        return jsonify({}), HTTPStatus.NO_CONTENT
+        return Response(status=HTTPStatus.NO_CONTENT)
