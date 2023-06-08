@@ -1,7 +1,7 @@
 from datetime import datetime
 from http import HTTPStatus
 
-from flask import jsonify, request, views
+from flask import Response, jsonify, request, views
 from marshmallow.exceptions import ValidationError
 
 from models import Token, User
@@ -56,6 +56,7 @@ class LogoutView(views.MethodView):
     model = Token
 
     def delete(self, *args, **kwargs):
-        self.model.query.filter_by(user_id=request.user.id).delete()
+        obj = self.model.query.filter_by(user_id=request.user.id)
+        db.session.delete(obj)
         db.session.commit()
-        return jsonify({}), HTTPStatus.NO_CONTENT
+        return Response(status=HTTPStatus.NO_CONTENT)
