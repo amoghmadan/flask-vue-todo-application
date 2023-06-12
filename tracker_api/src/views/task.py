@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from flask import Response, jsonify, request, views
+from flask_sqlalchemy.pagination import QueryPagination
 from marshmallow.exceptions import ValidationError
 
 from models import Item
@@ -16,15 +17,50 @@ class ItemListView(views.MethodView):
     model = Item
     schema_class = ItemSchema
 
-    def get(self, *args, **kwargs):
-        schema = self.schema_class(many=True)
+    def filter_query(self):
+        """Perform filtering and ordering."""
         filter_kwargs = {"user_id": request.user.id}
-        objects = self.model.query.filter_by(**filter_kwargs).order_by(
-            self.model.created.desc()
-        )
+        status_options = {str(s.value): s.name for s in self.model.Status}
+        status = request.args.get("status")
+        if status in status_options:
+            filter_kwargs["status"] = status_options[status]
+        order = self.model.created.asc()
+        order_options = ("created", "-created")
+        order_by = request.args.get("order")
+        if order_by in order_options and order_by != "created":
+            order = self.model.created.desc()
+        query = self.model.query.filter_by(**filter_kwargs).order_by(order)
+        return query
+
+    @staticmethod
+    def paginate(query):
+        """Paginate if parameters allow."""
+        page = request.args.get("page")
+        per_page = request.args.get("per_page")
+
+        if not page or not per_page:
+            return query
+        if not page.isdigit() or not per_page.isdigit():
+            return query
+
+        return query.paginate(page=int(page), per_page=int(per_page))
+
+    def get(self, *args, **kwargs):
+        """List all Task Items."""
+        schema = self.schema_class(many=True)
+        objects = self.paginate(self.filter_query())
+        if isinstance(objects, QueryPagination):
+            return {
+                "count": objects.total,
+                "has_prev": objects.has_prev,
+                "has_next": objects.has_next,
+                "results": schema.dump(objects),
+            }
+
         return jsonify(schema.dump(objects)), HTTPStatus.OK
 
     def post(self, *args, **kwargs):
+        """Create new Task Item."""
         schema = self.schema_class()
         try:
             instance = schema.load(request.json)
@@ -46,6 +82,7 @@ class ItemDetailView(views.MethodView):
     schema_class = ItemSchema
 
     def get_object(self, *args, **kwargs):
+        """Find Task Item by ID for the Current User."""
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {
             "user_id": request.user.id,
@@ -55,6 +92,7 @@ class ItemDetailView(views.MethodView):
         return obj
 
     def get(self, *args, **kwargs):
+        """Retrieve Task Item by ID."""
         obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
@@ -62,6 +100,7 @@ class ItemDetailView(views.MethodView):
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def put(self, *args, **kwargs):
+        """Update Task Item by ID."""
         obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
@@ -74,6 +113,7 @@ class ItemDetailView(views.MethodView):
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def patch(self, *args, **kwargs):
+        """Partial Update Task Item by ID."""
         obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
@@ -86,6 +126,7 @@ class ItemDetailView(views.MethodView):
         return jsonify(schema.dump(obj)), HTTPStatus.OK
 
     def delete(self, *args, **kwargs):
+        """Destroy Task Item by ID."""
         obj = self.get_object(*args, **kwargs)
         if not obj:
             return jsonify({"detail": "Not Found"}), HTTPStatus.NOT_FOUND
